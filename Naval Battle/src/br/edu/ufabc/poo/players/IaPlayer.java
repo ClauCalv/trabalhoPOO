@@ -10,6 +10,17 @@ public class IaPlayer extends Player {
 	private Random random;
 	private int[][] probabilityMap;
 	
+	/** Esta classe também poderia ser modificada pra criar mais um Design Pattern: Strategy:
+	 * 
+	 * Se tirar toda a parte de atualizar a matriz de probabilidades e delegar isso pra uma interface
+	 * que duas classes diferentes implementam, e fazer com que você escolha qual estratégia usar
+	 * de acordo com essa mesma variável.
+	 * 
+	 * Não vi motivo pra deixar a construção do mapa de probablilidades em outra classe, mas isso iria
+	 * deixar a UML do programa um pouco mais rica, além de contar ponto extra.
+	 * 
+	 * EDIT: Farei isso em uma terceira branch do GitHub e vocês vêem se ficou mais bonito, porque no
+	 * fundo não muda nada*/
 	private boolean seekAndDestroy = false;
 	
 	public IaPlayer(Ship[] myShips, Ship[] enemyShips, int mapSize) {
