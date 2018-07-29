@@ -1,62 +1,68 @@
 package br.edu.ufabc.poo.model;
 
-import java.util.HashMap;
-import java.util.Set;
 
 public class Ship {
 	
 	public final int size, id;
 	
-	/* Associa uma coordenada a seu estado de ter sido atingida*/
-	/** Ver os comentÃ¡rios em Player */
-	private HashMap<Vector2D, Boolean> positions;
+	/*** Coloquei um status aqui pra tirar o HashMap de Player */
+	private boolean isSunk = false;
 	
-	/** Um navio sÃ³ tem tamanho e identificador. O identificador vai ser usado somente na 
-	 * hora de saber qual dos navios inimigos que eu guardo no HashMap Ã© aquele que foi
+	/** Ver os comentários em Player */
+	private Vector2D[] positions;
+	
+	/** Um navio só tem tamanho e identificador. O identificador vai ser usado somente na 
+	 * hora de saber qual dos navios inimigos que eu guardo no HashMap é aquele que foi
 	 * afundado, na classe "Player" */
 	public Ship(int size, int id) {		
 		this.size = size;
 		this.id = id;
 	}
 	
-	/* Valida e associa o navio a sua posiÃ§Ã£o no mapa */
+	/* Valida e associa o navio a sua posição no mapa */
 	public boolean placeShip(Vector2D[] positions, int mapSize) {
 		
 		if(positions.length != size)
 			return false;
 		
-		this.positions = new HashMap<Vector2D, Boolean>(size); /** Cria um novo */
+		this.positions = new Vector2D[size]; /** Cria um novo */
 		
 		for (Vector2D pos : positions) {
 			if(!pos.isInBounds(0,0,mapSize,mapSize)) 
 				return false;
-			this.positions.put(pos, false);
+			pos.setHit(false);
 		}
 			
 		return true;
 	}
 	
-	/** Um navio sÃ³ Ã© afundado se todas as suas coordenadas jÃ¡ foram afundadas */
+	/** Um navio só é afundado se todas as suas coordenadas já foram afundadas */
 	public boolean isSunk() {
 		
-		for (Vector2D pos : positions.keySet())
-			if(!positions.get(pos)) 
-				return false;
+		if(!isSunk) {	
+			isSunk = true;
+			
+			for (Vector2D pos : positions)
+				if(!pos.isHit()) 
+					isSunk = false;
+		}
 		
-		return true;
+		return isSunk;
 	}
 	
+	public void setSunk(boolean isSunk) {
+		this.isSunk = isSunk;
+	}
 	
 	/* configura 'hit = true' caso atingido e 'ship = this' caso afundado */
 	/** Pra avaliar se tomou um tiro, compare a coordenada do tiro a cada uma das
-	 * coordenadas que vocÃª guarda. Se atingiu, marque a coordenada como afundada
+	 * coordenadas que você guarda. Se atingiu, marque a coordenada como afundada
 	 * e confira se o navio afundou, para avisar ao tiro que ele afundou um navio */
 	public void takeShot(Shot shot) {
 		
-		for (Vector2D pos : positions.keySet()) {
+		for (Vector2D pos : positions) {
 			if(shot.target.equals(pos)) {
-				/** Substitui o valor associado a "pos" no HashMap para "true" */
-				positions.replace(pos, true);
+				pos.setHit(true);
 				shot.hit = true;
 				break;
 			}
@@ -66,14 +72,13 @@ public class Ship {
 		
 	}
 	
-	/* retorna uma cÃ³pia do navio, mas sem informaÃ§Ãµes de sua posiÃ§Ã£o*/
+	/* retorna uma cópia do navio, mas sem informações de sua posição*/
 	public Ship blindClone() {
 		return new Ship(size, id);
 	}
 	
-	/** Retorna as coordenadas no conjunto das chaves do HashMap*/
-	public Set<Vector2D> getPositions() {
-		return positions.keySet();
+	public Vector2D[] getPositions() {
+		return positions;
 	}
 
 }

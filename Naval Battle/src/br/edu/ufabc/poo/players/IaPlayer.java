@@ -4,60 +4,56 @@ import java.util.LinkedList;
 import java.util.Random;
 
 import br.edu.ufabc.poo.model.*;
+import br.edu.ufabc.poo.strategy.*;
 
 public class IaPlayer extends Player {
 
 	private Random random;
-	private int[][] probabilityMap;
 	
-	/** Esta classe tamb√©m poderia ser modificada pra criar mais um Design Pattern: Strategy:
+	/*** Implantei aqui o DesignPattern: Strategy, mas em vez de interface, fiz com classe abstrata
+	 * https://en.wikipedia.org/wiki/Strategy_pattern 
 	 * 
-	 * Se tirar toda a parte de atualizar a matriz de probabilidades e delegar isso pra uma interface
-	 * que duas classes diferentes implementam, e fazer com que voc√™ escolha qual estrat√©gia usar
-	 * de acordo com essa mesma vari√°vel.
-	 * 
-	 * N√£o vi motivo pra deixar a constru√ß√£o do mapa de probablilidades em outra classe, mas isso iria
-	 * deixar a UML do programa um pouco mais rica, al√©m de contar ponto extra.
-	 * 
-	 * EDIT: Farei isso em uma terceira branch do GitHub e voc√™s v√™em se ficou mais bonito, porque no
-	 * fundo n√£o muda nada*/
-	private boolean seekAndDestroy = false;
+	 * Movi v·rios mÈtodos de uma classe pra outra:
+	 * -- IsValidShipPosition foi pra BattleMap
+	 * -- updateProbebilityMap foi pra DefaultProbabilityMapDrawer
+	 * -- updateProbebilityMapOnSnD foi pra SnDProbabilityMapDrawer */
+	private ProbabilityMapDrawer probabilityMap;
 	
 	public IaPlayer(Ship[] myShips, Ship[] enemyShips, int mapSize) {
 		super(myShips, enemyShips, mapSize);
 		random = new Random();
-		probabilityMap = new int[mapSize][mapSize];
+		probabilityMap = new DefaultProbabilityMapDrawer(battleMap, enemyShips);
 	}
 
-	/* Para que os navios sejam sempre aleat√≥rios, tenta v√°rias combina√ß√µes e pega uma v√°lida */
+	/* Para que os navios sejam sempre aleatÛrios, tenta v·rias combinaÁıes e pega uma v·lida */
 	public void placeShips() {
 		
-		/** T√°, toda essa sequ√™ncia de m√©todos √© uma grande gambiarra. Pra n√£o ter que fazer uma
-		 * cole√ß√£o de matrizes de navios que ela come√ßa jogando (seria uma p√©ssima IA depois de se
-		 * enfrentar algumas vezes), eu gero aleatoriamente uma matriz, e se n√£o √© v√°lida, eu
+		/** T·, toda essa sequÍncia de mÈtodos È uma grande gambiarra. Pra n„o ter que fazer uma
+		 * coleÁ„o de matrizes de navios que ela comeÁa jogando (seria uma pÈssima IA depois de se
+		 * enfrentar algumas vezes), eu gero aleatoriamente uma matriz, e se n„o È v·lida, eu
 		 * descarto e tento outra.
 		 * 
-		 * Isso pode demorar, por isso √© importante que a soma dos pontos
-		 * ocupados por navios n√£o ultrapasse metade dos pontos do mapa, sen√£o posicionar navios
-		 * ser√° imposs√≠vel. Da√≠ um bom motivo pra validadar a entrada do n√∫mero e tipo de navios */
+		 * Isso pode demorar, por isso È importante que a soma dos pontos
+		 * ocupados por navios n„o ultrapasse metade dos pontos do mapa, sen„o posicionar navios
+		 * ser· impossÌvel. DaÌ um bom motivo pra validadar a entrada do n˙mero e tipo de navios */
 		boolean valid = false;
 		while(!valid) 
 			valid = placeShipsAtRandom();
 		
-		clearMap();
+		battleMap.clearMap();
 	}
 	
-	/* Para cada navio, sorteia um ponto no mapa e tenta encaix√°-lo. Sen√£o, desiste. */
+	/* Para cada navio, sorteia um ponto no mapa e tenta encaix·-lo. Sen„o, desiste. */
 	private boolean placeShipsAtRandom() {
 		
-		/** Para cada navio que deve ser encaixado, sorteie um ponto e tente encaix√°-lo nas quatro
-		 * orienta√ß√µes (cima, baixo, esquerda, direita) poss√≠veis. Se n√£o for poss√≠vel, teremos que
-		 * tirar todos os navios e tentar reencaix√°-los um por um.
+		/** Para cada navio que deve ser encaixado, sorteie um ponto e tente encaix·-lo nas quatro
+		 * orientaÁıes (cima, baixo, esquerda, direita) possÌveis. Se n„o for possÌvel, teremos que
+		 * tirar todos os navios e tentar reencaix·-los um por um.
 		 * 
-		 * Para evitar de reiniciar muitas vezes, eu pe√ßo pra ele conferir no espelho desse ponto,
-		 * o ponto (y,x), antes de anunciar que os navios n√£o encaixam mais */
+		 * Para evitar de reiniciar muitas vezes, eu peÁo pra ele conferir no espelho desse ponto,
+		 * o ponto (y,x), antes de anunciar que os navios n„o encaixam mais */
 		for (Ship ship : myShips) {
-			int xR = random.nextInt(battleMap.length), yR = random.nextInt(battleMap.length);
+			int xR = random.nextInt(battleMap.size), yR = random.nextInt(battleMap.size);
 			int direction = random.nextInt(4);
 			
 			boolean valid = false;
@@ -72,7 +68,7 @@ public class IaPlayer extends Player {
 					xR = aux;
 				}
 				
-				valid = isValidShipPosition(ship.size, xR, yR, direction);
+				valid = battleMap.isValidShipPosition(ship.size, xR, yR, direction);
 				if(valid) {
 					putShipOnGrid(ship, xR, yR, direction);
 					break;
@@ -87,43 +83,13 @@ public class IaPlayer extends Player {
 		return true;
 	}
 	
-	/* Verifica a possibilidade de um navio estar posicionado naquela coordenada e dire√ß√£o */
-	private boolean isValidShipPosition(int size, int x, int y, int direction) {
-		
-		/** Esse m√©todo √© usado duas vezes, uma na coloca√ß√£o de navios no grid, e outra na
-		 * cria√ß√£o do mapa de propabilidades pra IA poder disparar.
-		 * 
-		 * Ele analisa se o navio encaixa naquelas coordenadas iniciais e orienta√ß√£o. Repare que
-		 * um navio s√≥ cabe se ele passa por UNKNOWN ou HIT. Se ele passasse por MISS, estar√≠amos
-		 * dizendo que um navio pode ter um buraco dentro dele. Se ele passasse por SUNK,
-		 * estar√≠amos dizendo que um navio pode estar em cima de outro.
-		 * 
-		 * Por isso, o m√©todo que coloca navios na mesa para validar, coloca como SUNK, para
-		 * reaproveitar esse m√©todo.*/
-		
-		int newX, newY;
-		for (int i = 0; i < size; i++) {
-			newX = direction==0 ? x+i : direction==2 ? x-i : x;
-			newY = direction==1 ? y+i : direction==3 ? y-i : y;
-			
-			if( ! (new Vector2D(newX,newY)).isInBounds(0, 0, battleMap.length, battleMap.length) )
-				return false;
-			
-			if(battleMap[newX][newY] == MISS || battleMap[newX][newY] == SUNK)
-				return false;
-		}
-		
-		return true;
-		
-	}
-	
-	/* Armazena os navios no mapa para que seja valid√°vel. Tamb√©m atualiza as infos dos navios */
+	/* Armazena os navios no mapa para que seja valid·vel. TambÈm atualiza as infos dos navios */
 	private void putShipOnGrid(Ship ship, int x, int y, int direction) {
 		
-		/** Coloca um navio no grid pra ser validado no final. Al√©m disso, j√° informa ao navio
-		 * que aquelas ser√£o as coordenadas dele.
+		/** Coloca um navio no grid pra ser validado no final. AlÈm disso, j· informa ao navio
+		 * que aquelas ser„o as coordenadas dele.
 		 * 
-		 * N√£o precisa limpar se a configura√ß√£o atual de navios der errado, pois a nova vai
+		 * N„o precisa limpar se a configuraÁ„o atual de navios der errado, pois a nova vai
 		 * sobrescrever a antiga. */
 		
 		int newX, newY;
@@ -133,60 +99,59 @@ public class IaPlayer extends Player {
 			newX = direction==0 ? x+i : direction==2 ? x-i : x;
 			newY = direction==1 ? y+i : direction==3 ? y-i : y;
 			
-			battleMap[newX][newY] = SUNK;
+			battleMap.setStatusAtPoint(newX, newY, Status.SUNK);
 			positions[i] = new Vector2D(newX,newY);
 			
 		}
 		
-		ship.placeShip(positions, battleMap.length);
+		ship.placeShip(positions, battleMap.size);
 		
 	}
 	
-	/* Alterna entre o modo de procura e persegui√ß√£o */
+	/* Alterna entre o modo de procura e perseguiÁ„o */
 	public void shotResults(Shot shot) {
 		
-		/** A IA tem dois modos: procura e persegui√ß√£o. Se h√° uma √∫nica coordenada com HIT no mapa,
+		/** A IA tem dois modos: procura e perseguiÁ„o. Se h· uma ˙nica coordenada com HIT no mapa,
 		 * a IA para de procurar todos os pontos que podem ter navios, e procura somente aqueles
 		 * que podem ter o navio atingido naquele ponto.
 		 * 
 		 * Por isso, sempre que um tiro atinge sem afundar, ela entra automaticamente em modo de
-		 * persegui√ß√£o. No entanto, se um navio for afundado, n√£o significa que n√£o h√° mais pontos
+		 * perseguiÁ„o. No entanto, se um navio for afundado, n„o significa que n„o h· mais pontos
 		 * com HIT no mapa, pois posso ter atingido outro navio perseguindo este. Pra isso, eu
 		 * verifico. */
 		
 		super.shotResults(shot);
 		
+		boolean seekAndDestroy = false;
+		
 		if(shot.hit)
 			if(shot.sunkShip == null)
 				seekAndDestroy = true;
-			else 
-				seekAndDestroy = updateSnDStatus();
+			else
+				for (int i = 0; i < battleMap.size; i++)
+					for (int j = 0; j < battleMap.size; j++)			
+						if(battleMap.getStatusAtPoint(i, j).equalsAny(Status.HIT))
+							seekAndDestroy = true;
+				
+		updateStrategy(seekAndDestroy);
 	}
 
-	/* Descobre se h√° navios a serem perseguidos no mapa */
-	private boolean updateSnDStatus() {
-		
-		for (int i = 0; i < probabilityMap.length; i++)
-			for (int j = 0; j < probabilityMap.length; j++)			
-				if(battleMap[i][j] == HIT) 
-					return true;
-				
-		return false;
+	/* Descobre se h· navios a serem perseguidos no mapa */
+	private void updateStrategy(boolean seekAndDestroy) {
+		probabilityMap = seekAndDestroy ? new SnDProbabilityMapDrawer(battleMap, enemyShips) : 
+					new DefaultProbabilityMapDrawer(battleMap, enemyShips);
 	}
 
 	/* Atira no ponto de maior chance de acertar um navio, sorteando em caso de empate */
 	public Shot shoot() {
 		
-		/** Os mapas de probabilidade constroem o n√∫mero de navios que podem estar em cada ponto.
-		 * O mais l√≥gico, portanto, √© atirar onde pode haver mais navios. */
+		/** Os mapas de probabilidade constroem o n˙mero de navios que podem estar em cada ponto.
+		 * O mais lÛgico, portanto, È atirar onde pode haver mais navios. */
 	
-		if(!seekAndDestroy)
-			updateProbabilityMap();
-		else	
-			updateProbabilityMapOnSnD();
+		int[][] probabilityMap = this.probabilityMap.update();
 	
-		/** Isso √© uma esp√©cie de fragmento de SelectionSort, mas em vez de pegar o primeiro maior,
-		 * ele pega todos que est√£o empatados com maior n√∫mero prov√°vel de navios */
+		/** Isso È uma espÈcie de fragmento de SelectionSort, mas em vez de pegar o primeiro maior,
+		 * ele pega todos que est„o empatados com maior n˙mero prov·vel de navios */
 		
 		LinkedList<Vector2D> maximumPoints = new LinkedList<>();
 		int maximumValue = 0;
@@ -204,106 +169,14 @@ public class IaPlayer extends Player {
 				
 			}
 				
-		/** No final, atira aleatoriamente dentre os mais prov√°veis */
+		/** No final, atira aleatoriamente dentre os mais prov·veis */
 		return new Shot(maximumPoints.get(random.nextInt(maximumPoints.size())));
 	
 	}
-	
-	/* Limpa o mapa de probabilidades, e o preenche com os pontos em torno dos acertos
-	 * nos quais h√° chance de se acertar novamente */
-	private void updateProbabilityMapOnSnD() {
-		
-		/** Primeiro, limpa o mapa da rodada anterior */
-		
-		for (int i = 0; i < probabilityMap.length; i++)
-			for (int j = 0; j < probabilityMap.length; j++)
-				probabilityMap[i][j] = 0;
-		
-		/** Repare que h√° 5 la√ßos de repeti√ß√£o aqui dentro, dois pra percorrer a matriz, um
-		 * para conferir cada navio, um para cada orienta√ß√£o poss√≠vel, e um para conferir
-		 * cada uma das coordenadas ao longo da orienta√ß√£o escolhida.
-		 * 
-		 *  O pen√∫ltimo n√£o √© um la√ßo de fato, porque as orienta√ß√µes poss√≠veis est√£o
-		 *  explicitamente aberto nos quatro IFs em sequ√™ncia abaixo.
-		 *  
-		 *  Repare que como eu analiso somente os pontos marcados com HIT, √© necess√°rio
-		 *  conferir as quatro orienta√ß√µes. */
-		
-		for (int i = 0; i < probabilityMap.length; i++)
-			for (int j = 0; j < probabilityMap.length; j++) {
-				
-				if(battleMap[i][j] != HIT)
-					continue;
-				
-				for (Ship ship : enemyShips.keySet())
-					/** Pergunta se o navio n√£o foi afundado ainda, pegando o valor do HashMap
-					 * que est√° associado com a chave "ship".*/
-					if(!enemyShips.get(ship)) {						
-						
-						if(isValidShipPosition(ship.size, i, j, 0))
-							for (int k = 1; k < ship.size; k++)
-								if(battleMap[i+k][j] != HIT)
-									probabilityMap[i+k][j]++;
-							
-						if(isValidShipPosition(ship.size, i, j, 1))
-							for (int k = 1; k < ship.size; k++)
-								if(battleMap[i][j+k] != HIT)
-									probabilityMap[i][j+k]++;
-						
-						if(isValidShipPosition(ship.size, i, j, 2))
-							for (int k = 1; k < ship.size; k++)
-								if(battleMap[i-k][j] != HIT)
-									probabilityMap[i-k][j]++;
-							
-						if(isValidShipPosition(ship.size, i, j, 3))
-							for (int k = 1; k < ship.size; k++)
-								if(battleMap[i][j-k] != HIT)
-									probabilityMap[i][j-k]++;
-						
-					}
-			}
-		
-	}
-
-	/* Limpa o mapa de probabilidades, e o preenche com os pontos com maior chance de acerto */
-	private void updateProbabilityMap() {
-		
-		for (int i = 0; i < probabilityMap.length; i++)
-			for (int j = 0; j < probabilityMap.length; j++)
-				probabilityMap[i][j] = 0;
-		
-		/** Diferente do modo de persegui√ß√£o, no modo de procura eu testo todo ponto no mapa
-		 *  
-		 *  Como eu analiso todos os pontos no mapa v√°lidos, n√£o √© necess√°rio conferir as quatro
-		 *  orienta√ß√µes poss√≠veis, basta varrer pra baixo e pra esquerda, e todos as possibilidades
-		 *  de encaixe j√° ser√£o contempladas. */
-		
-		for (int i = 0; i < probabilityMap.length; i++)
-			for (int j = 0; j < probabilityMap.length; j++) {
-				
-				if(battleMap[i][j] == MISS || battleMap[i][j] == SUNK)
-					continue;
-				
-				for (Ship ship : enemyShips.keySet())
-					if(!enemyShips.get(ship)) {						
-						
-						if(isValidShipPosition(ship.size, i, j, 0))
-							for (int k = 0; k < ship.size; k++)
-								probabilityMap[i+k][j]++;
-							
-						if(isValidShipPosition(ship.size, i, j, 1))
-							for (int k = 0; k < ship.size; k++)
-								probabilityMap[i][j+k]++;
-						
-					}
-			}
-		
-	}
-	
 
 	public void startTurn() {
 		
-		// TODO: N√£o fazer nada? Exibir algo enquanto a IA joga?
+		// TODO: N„o fazer nada? Exibir algo enquanto a IA joga?
 		
 	}
 
