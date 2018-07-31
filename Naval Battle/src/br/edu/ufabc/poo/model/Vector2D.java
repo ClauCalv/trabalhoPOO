@@ -3,6 +3,8 @@ package br.edu.ufabc.poo.model;
 public class Vector2D {
 
 	public final int x, y;
+	/*** Adicionei um status de afundado aqui para eliminar o HashMap dos navios*/
+	private boolean isHit = false;
 	
 	/* Simples encapsulador para uma coordenada */
 	/** Eu irei usar este objeto para armazenar coordenadas */
@@ -17,9 +19,17 @@ public class Vector2D {
 		return x == v.x && y == v.y;
 	}	
 	
-	/* Verifica se a coordenada estÃ¡ no retÃ¢ngulo de jogo. MIN incluso, MAX excluso */
+	/* Verifica se a coordenada está no retângulo de jogo. MIN incluso, MAX excluso */
 	public boolean isInBounds(int minX, int maxX, int minY, int maxY) {
 		
 		return x >= minX && x < maxX && y >= minY && y < maxY;	
+	}
+	
+	public boolean isHit() {
+		return isHit;
+	}
+	
+	public void setHit(boolean isHit) {
+		this.isHit = isHit;
 	}
 }

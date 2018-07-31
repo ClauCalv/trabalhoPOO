@@ -1,77 +1,43 @@
 package br.edu.ufabc.poo.players;
 
-import java.util.HashMap;
-
 import br.edu.ufabc.poo.model.*;
 
 public abstract class Player {
 	
-	/** Isso s√£o constantes num√©ricas. Constantes (static final) se escrevem em CAPSLOCK 
-	 * O professor pediu para que cada coordenada do mapa fosse um objeto, mas em vez disso eu
-	 * coloquei n√∫meros. Sugiro tr√™s coisas que resolvem isso
+	/*** Eu fiz as modificaÁıes anunciadas no item 3) do coment·rio da ˙ltima vers„o.
+	 * Agora, battleMap n„o È mais um int[][], mas uma classe, e n„o temos mais um
+	 * "protected static final int UNKNOWN = 0, MISS = 1, HIT = 2, SUNK = 3", mas em
+	 * vez disso temos um ENUM. Um ENUM È um tipo de classe na qual todas as inst‚ncias
+	 * possÌveis j· foram criadas e s„o est·ticas, sendo efetivamente uma lista pronta
+	 * de objetos. 
 	 * 
-	 * 1) Criem uma classe com essas constantes num√©ricas e uma vari√°vel chamada ESTADO, que diz
-	 * como ela est√° no momento, e o m√©todo agora teria que chamar comparar atributos de objetos
-	 * e n√£o mais vari√°vel, ent√£o ficaria por exemplo:
-	 * -- protected final MapTile[][] battleMap;
-	 * -- battleMap[i][j].setState(MapTile.UNKNOWN);
-	 * -- if(battleMap[i][j].getStatus() == MapTile.HIT) 
-	 * 
-	 * 2) Reutilizem a classe Vector2D, colocando essa funcionalidade nela, e ver√£o que d√° pra
-	 * simplificar at√© mais c√≥digo ainda, e n√£o ter√≠amos que usar hashmaps, s√≥ vetores, porque as
-	 * pr√≥prias coordenadas j√° guardam seu estado
-	 * 
-	 * 3) Criem um ENUM, √© tipo um objeto s√≥ que todas suas instancias j√° existem e s√£o est√°ticas
-	 * Essa solu√ßao pode ainda ser misturada com as duas primeiras, ou implementada sozinha nesta
-	 * mesma classe, e agora, seja "public enum TileState" uma '''classe'''', basta fazer
-	 * "protected final TileState[][] battleMap;" uma matriz de enums. Minha solu√ß√£o predileta
-	 * seria implementar a 2 e a 3 juntas, por√©m deixo escolherem como querem fazer ou se querem
-	 * que eu fa√ßa essa corre√ß√£o no c√≥digo 
-	 * 
-	 * EDIT: Vou subir em outra branch no Github a corre√ß√£o que eu faria, fiquem a vontade pra
-	 * n√£o usar, porque ela usa coisa que voc√™s n√£o ver√£o em aula.*/
-	protected static final int UNKNOWN = 0, MISS = 1, HIT = 2, SUNK = 3;
+	 * Reparem na nova sintaxe usada ao mexer nos Status, que s„o Enums. */
 	
 	protected final Ship[] myShips;
-	/* Associa um navio inimigo a seu estado de ter sido afundado*/
-	/** Um HashMap trabalha com pares de valores <K,V>, ou Keys e Values, chaves e valores
-	 * Pra cada elemento na lista de chaves, que n√£o pode ter repeti√ß√µes, h√° um √∫nico elemento
-	 * na lista de valores para o qual ele corresponde. Isso permite fazer que cada navio tenha
-	 * associado consigo um valor booleano que diz se ele j√° foi afundado.
-	 * 
-	 * Repare que myShips √© s√≥ um vetor porque n√£o preciso associar nada a eles, n√£o me faz
-	 * diferen√ßa se meus navios foram afundados, s√≥ precisa saber quais navios eu tenho */
-	protected final HashMap<Ship, Boolean> enemyShips;
+	/** EDIT: Eu tirei todos os HashMaps do cÛdigo substituindo por atributos boolean nas classes. */
+	protected final Ship[] enemyShips;
 	
-	/** Aqui est√° a matriz que deve ser arrumada. Lembrem que tudo envolvido com ela tem que
-	 * ser arrumado tamb√©m! */
-	protected final int[][] battleMap;
+	/** Eu fiz de battleMap que era um int[][] uma classe separada */
+	protected final BattleMap battleMap;
 	
-	/* Cria para si uma c√≥pia cega dos navios inimigos, para ser rastreada */
+	/* Cria para si uma cÛpia cega dos navios inimigos, para ser rastreada */
 	public Player(Ship[] myShips, Ship[] enemyShips, int mapSize){
 		
-		battleMap = new int[mapSize][mapSize];
-		clearMap();
+		battleMap = new BattleMap(mapSize);
+		battleMap.clearMap();
 		
 		this.myShips = myShips;
 		
-		this.enemyShips = new HashMap<Ship, Boolean>(enemyShips.length);
-		for (Ship ship : enemyShips)
-			this.enemyShips.put(ship.blindClone(), false);
-			/* insere falso pois o navio n√£o foi afundado */
+		this.enemyShips = new Ship[enemyShips.length];
+		for (int i = 0; i < enemyShips.length; i++)
+			this.enemyShips[i] = enemyShips[i].blindClone();
+			/* insere falso pois o navio n„o foi afundado */
 			/** Os clones cegos servem pra mostrar pra um oponente um navio seu sem mostrar o
-			 * interior. Esses clones s√£o outro objeto, e portanto, os originais s√£o
-			 * inacess√≠veis atrav√©s dele. */
+			 * interior. Esses clones s„o outro objeto, e portanto, os originais s„o
+			 * inacessÌveis atravÈs dele. */
 	}
 	
-	/* Limpa a matriz de batalha, para come√ßar o jogo */
-	protected void clearMap() {
-		for (int i = 0; i < battleMap.length; i++)
-			for (int j = 0; j < battleMap.length; j++)
-				battleMap[i][j] = UNKNOWN;
-	}
-	
-	/** Esses m√©todos s√£o abstratos pois v√£o ser implementados diferente pelo Human e IA */
+	/** Esses mÈtodos s„o abstratos pois v„o ser implementados diferente pelo Human e IA */
 	public abstract void placeShips();
 	public abstract Shot shoot();
 	public abstract void startTurn();
@@ -80,31 +46,31 @@ public abstract class Player {
 	/* Atualiza a matriz de batalha com os resultados do tiro */
 	public void shotResults(Shot shot) {
 		
-		/** Quatro valores poss√≠veis para o estado daquele ponto s√£o armazenados na matriz:
-		 *  acerto, afundado, erro e desconhecido. No come√ßo, tudo √© desconhecido, conforme
+		/** Quatro valores possÌveis para o estado daquele ponto s„o armazenados na matriz:
+		 *  acerto, afundado, erro e desconhecido. No comeÁo, tudo È desconhecido, conforme
 		 *  se joga, se preenche com acerto ou erro para saber onde atirar depois
 		 *  
-		 *  Se o tiro afunda algum navio, todas as coordenadas daquele navio s√£o marcadas
-		 *  como afundadas, pois sabe-se que aqueles pontos, apesar de acertos, n√£o pertencem
+		 *  Se o tiro afunda algum navio, todas as coordenadas daquele navio s„o marcadas
+		 *  como afundadas, pois sabe-se que aqueles pontos, apesar de acertos, n„o pertencem
 		 *  a outro navio */
 		
 		if(!shot.hit)
-			battleMap[shot.target.x][shot.target.y] = MISS;
+			battleMap.setStatusAtPoint(shot.target, Status.MISS);
 		else if(shot.sunkShip == null)
-			battleMap[shot.target.x][shot.target.y] = HIT;
+			battleMap.setStatusAtPoint(shot.target, Status.HIT);
 		else {
-			/** Repare que aqui o shot.sunkShip √© um dos navios que seu oponente armazena, e
-			 * portanto possui coordenadas e informa√ß√µes. Agora que voc√™ o afundou, tem acesso
-			 * √† elas. Ent√£o voc√™ vai usar elas pra duas coisas.
+			/** Repare que aqui o shot.sunkShip È um dos navios que seu oponente armazena, e
+			 * portanto possui coordenadas e informaÁıes. Agora que vocÍ o afundou, tem acesso
+			 * ‡ elas. Ent„o vocÍ vai usar elas pra duas coisas.
 			 * 
-			 * Primeiro, compara qual das c√≥pias que voc√™ mant√©m corresponde √†quele navio, e
-			 * marca ela como afundada, para ter controle do que voc√™ j√° afundou.*/
-			for (Ship ship : enemyShips.keySet())				
+			 * Primeiro, compara qual das cÛpias que vocÍ mantÈm corresponde ‡quele navio, e
+			 * marca ela como afundada, para ter controle do que vocÍ j· afundou.*/
+			for (Ship ship : enemyShips)				
 				if(shot.sunkShip.id == ship.id) 
-					enemyShips.replace(ship, true);
+					ship.setSunk(true);
 			
 			for (Vector2D pos : shot.sunkShip.getPositions())
-				battleMap[pos.x][pos.y] = SUNK;
+				battleMap.setStatusAtPoint(pos, Status.SUNK);
 		}
 	}
 	
@@ -117,16 +83,19 @@ public abstract class Player {
 		}
 	}
 	
-	/* Confere se o oponente est√° sem navios */
-	/** Quem armazena os navios afundados √© o afundador, portanto um jogador n√£o tem como
+	/* Confere se o oponente est· sem navios */
+	/** Quem armazena os navios afundados È o afundador, portanto um jogador n„o tem como
 	 * saber que ele perdeu, mas sim seu oponente sabe que ganhou. */
 	public boolean isWinner() {
 		
-		for (Ship ship : enemyShips.keySet())
-			if(!enemyShips.get(ship)) 
+		for (Ship ship : enemyShips)
+			if(!ship.isSunk()) 
 				return false;
 		
 		return true;
 	}
 
+	public BattleMap getBattleMap() {
+		return battleMap;
+	}
 }

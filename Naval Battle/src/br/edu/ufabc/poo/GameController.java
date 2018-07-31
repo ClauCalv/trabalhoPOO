@@ -1,5 +1,8 @@
 package br.edu.ufabc.poo;
 
+import java.awt.EventQueue;
+
+import br.edu.ufabc.poo.gui.MainFrame;
 import br.edu.ufabc.poo.model.*;
 import br.edu.ufabc.poo.players.*;
 
@@ -19,20 +22,33 @@ public final class GameController {
 		return INSTANCE;
 	}
 
-	public static void main(String[] args) {
-		/** Eu acabei de inserir um Design Pattern: Singleton, vale ponto extra na nota
-		 * 
-		 * Singleton envolve garantir que s√≥ haja a qualquer momento uma √∫nica inst√¢ncia
-		 * por isso esta classe √© final, o construtor √© private, e tem uma constante est√°tica
-		 * iniciada com uma √∫nica inst√¢ncia que ser√° acessada */
-		GameController.getInstance().start();
+//	public static void main(String[] args) {
+//		/** Eu acabei de inserir um Design Pattern: Singleton, vale ponto extra na nota
+//		 * https://en.wikipedia.org/wiki/Singleton_pattern
+//		 * 
+//		 * Singleton envolve garantir que sÛ haja a qualquer momento uma ˙nica inst‚ncia
+//		 * por isso esta classe È final, o construtor È private, e tem uma constante est·tica
+//		 * iniciada com uma ˙nica inst‚ncia que ser· acessada */
+//		GameController.getInstance().start();
+//		
+//		EventQueue.invokeLater(new Runnable() {
+//			public void run() {
+//				try {
+//					MainFrame frame = new MainFrame();
+//					frame.setVisible(true);
+//				} catch (Exception e) {
+//					e.printStackTrace();
+//				}
+//			}
+//		});
+//
+//	}
 
-	}
-
-	private void start() {
-		/** O que est√° marcado com "//TODO:" √© o que falta ser feito */
-		// TODO: Solicitar aos jogadores que configurem o jogo: n√∫mero e tamanho de navios, 
-		// singleplayer/multiplayer, configura√ß√µes gr√°ficas e de acesso aos turnos.
+	public void start(boolean isMultiplayer, int mapSize, int[] shipSizes) {
+		
+		this.isMultiplayer = isMultiplayer;
+		this.mapSize = mapSize;
+		this.shipSizes = shipSizes;
 		
 		setup();
 		play();
@@ -40,7 +56,7 @@ public final class GameController {
 
 	private void setup() {
 		
-		/** Aqui o c√≥digo instancia os navios a serem usados, repare que com IDs diferentes */
+		/** Aqui o cÛdigo instancia os navios a serem usados, repare que com IDs diferentes */
 		
 		Ship[] player0Ships = new Ship[shipSizes.length];
 		Ship[] player1Ships = new Ship[shipSizes.length];
@@ -49,7 +65,7 @@ public final class GameController {
 			player1Ships[i] = new Ship(shipSizes[i], 2*i + 1);
 		}
 		
-		/** Repare que players √© um vetor de Player, e HumanPlayer e IAPlayer herdam desta*/		
+		/** Repare que players È um vetor de Player, e HumanPlayer e IAPlayer herdam desta*/		
 		players[0] = new HumanPlayer(player0Ships, player1Ships, mapSize);
 		if(isMultiplayer)
 			players[1] = new HumanPlayer(player1Ships, player0Ships, mapSize);
@@ -59,10 +75,10 @@ public final class GameController {
 		
 	}
 	
-	/* Controla qual oponente estar√° jogando desta vez */
+	/* Controla qual oponente estar· jogando desta vez */
 	private void changeTurn(int p) {		
 		
-		int p1 = p, p2 = p==1 ? 0 : 1; /* p2 √© oposto ao p1 */
+		int p1 = p, p2 = p==1 ? 0 : 1; /* p2 È oposto ao p1 */
 		
 		players[p2].endTurn();
 		players[p1].startTurn();
@@ -72,22 +88,22 @@ public final class GameController {
 		
 		/** Cada jogador posiciona seus navios pro jogo iniciar. 
 		 * 
-		 * Repare que o navio de cada jogador n√£o tem mais rela√ß√£o com os navios inimigos outro */		
+		 * Repare que o navio de cada jogador n„o tem mais relaÁ„o com os navios inimigos outro */		
 		changeTurn(0);
 		players[0].placeShips();
 		changeTurn(1);
 		players[1].placeShips();
 		
-		/** Alterna todo fim de loop quem √© o 1 e quem √© o 0, assim poupa escrita 
+		/** Alterna todo fim de loop quem È o 1 e quem È o 0, assim poupa escrita 
 		 * 
-		 *  Se o jogador do turno passado n√£o ganhou, o jogador desse turno atira,
+		 *  Se o jogador do turno passado n„o ganhou, o jogador desse turno atira,
 		 *  depois o oponente avalia o tiro, e por fim o jogador deste turno o computa */
 		int p1 = 0, p2 = 1;
 		while(!players[p2].isWinner()) {
 			
 			changeTurn(p1);
 			
-			/** Repare que Shot √© mantido de um m√©todo pro outro, usaremos isso */
+			/** Repare que Shot È mantido de um mÈtodo pro outro, usaremos isso */
 			Shot shot = players[p1].shoot();
 			players[p2].takeShot(shot);
 			players[p1].shotResults(shot);
@@ -102,7 +118,7 @@ public final class GameController {
 
 	private void gameOver(int p2) {
 		
-		// TODO: Player p2 ganhou. Perguntar se quer recome√ßar.
+		// TODO: Player p2 ganhou. Perguntar se quer recomeÁar.
 		
 	}
 	

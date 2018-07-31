@@ -7,9 +7,9 @@ public class Shot {
 	public Ship sunkShip;
 
 	/* Simples encapsulador para um tiro */
-	/** A inten√ß√£o √© que em TakeShot, esse objeto seja configurado, e em ShotResults, seja lido
+	/** A intenÁ„o È que em TakeShot, esse objeto seja configurado, e em ShotResults, seja lido
 	 * 
-	 * Tudo √© p√∫blico, e s√≥ a coordenada alvo √© final, n√£o h√° necessidade de encapsular */
+	 * Tudo È p˙blico, e sÛ a coordenada alvo È final, n„o h· necessidade de encapsular */
 	public Shot(Vector2D target) {
 		this.target = target;
 		hit = false;
