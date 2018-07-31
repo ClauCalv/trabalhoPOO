@@ -1,7 +1,6 @@
 package br.edu.ufabc.poo.user;
 
 import java.io.IOException;
-import java.util.LinkedList;
 import java.util.Scanner;
 
 import br.edu.ufabc.poo.model.BattleMap;
@@ -9,8 +8,6 @@ import br.edu.ufabc.poo.model.Ship;
 import br.edu.ufabc.poo.model.Shot;
 import br.edu.ufabc.poo.model.Status;
 import br.edu.ufabc.poo.model.Vector2D;
-import br.edu.ufabc.poo.players.HumanPlayer;
-import br.edu.ufabc.poo.players.IaPlayer;
 import br.edu.ufabc.poo.players.Player;
 
 public class UserController {
@@ -64,7 +61,7 @@ public class UserController {
 			if(input.equals("0"))
 				return true;
 			if(input.equals("1"))
-				return true;
+				return false;
 		}
 	}
 	
@@ -105,7 +102,7 @@ public class UserController {
 			
 			System.out.println(" - Use somente vírgulas para separar os valores;\n"
 							   + " - Os navios devem ter tamanho maior ou igual a 2;\n"
-							   + " - Os navios não podem ser maiores que a lateral do mapa"
+							   + " - Os navios não podem ser maiores que a lateral do mapa\n"
 							   + " - Insira '0' para iniciar a configuração padrão");
 			
 			String input = scanner.nextLine();
@@ -212,7 +209,7 @@ public class UserController {
 
 	public void warnLastShot(Shot shot) {
 		
-		String message = "Você recebeu um disparo em "+ ('A' + shot.target.y) + "" + shot.target.x;
+		String message = "Você recebeu um disparo em "+ (char)('A' + shot.target.y) + "" + (shot.target.x+1);
 		if(shot.hit)
 			message += " que acertou um navio aliado";
 		if(shot.sunkShip!=null)
@@ -233,7 +230,7 @@ public class UserController {
 			String remainingShipList = "";
 			
 			for (Ship ship : myShips)
-				if(ship.isSunk()) {
+				if(!ship.isSunk()) {
 					remainingShipList += ship.size + " ";
 					remainingShips++;
 				}
@@ -241,7 +238,7 @@ public class UserController {
 			if(remainingShips == 0)
 				break;
 			
-			System.out.print("Navios ainda disponíveis: " + remainingShipList);
+			System.out.println("Navios ainda disponíveis: " + remainingShipList);
 			
 			System.out.println("U = Vazio, S = Navio\n");
 			printBattleMap(battleMap);
@@ -252,28 +249,30 @@ public class UserController {
 			
 			String[] shipCoords = input.split(",");
 			Vector2D[] coords = new Vector2D[shipCoords.length];
+			boolean valid = false;
 			try {
 				for (int i = 0; i < coords.length; i++) {
 					int y = shipCoords[i].charAt(0) - 'A';
-					int x = Integer.parseInt(shipCoords[i].substring(1));
+					int x = Integer.parseInt(shipCoords[i].substring(1)) - 1;
 					coords[i] = new Vector2D(x, y);					
 				}
 				
-				isShipPositionValid(coords, myShips, battleMap);
+				valid = isShipPositionValid(coords, myShips, battleMap);
 			} catch (Exception e2) {
 				System.out.println("Coordenadas inválidas");
 			}
 			
-			while(true) {
-				System.out.println("Manter a configuração atual? Digite '1' para manter ou '0' para recomeçar");
-				String input2 = scanner.nextLine(); 
-				if(input2 == "1")
-					break;
-				if(input2 == "0") {
-					placeShips(battleMap, myShips);
-					return;
-				}
-			}			
+			if(!valid)
+				while(true) {
+					System.out.println("Manter a configuração atual? Digite '1' para manter ou '0' para recomeçar");
+					String input2 = scanner.nextLine(); 
+					if(input2.equals("1"))
+						break;
+					if(input2.equals("0")) {
+						placeShips(battleMap, myShips);
+						return;
+					}
+				}			
 		}
 		
 		for (Ship ship : myShips)
@@ -286,7 +285,7 @@ public class UserController {
 		
 		Ship availableShip = null;
 		for (Ship ship : myShips)
-			if(!ship.isSunk() && ship.size == coords.length)
+			if((!ship.isSunk()) && ship.size == coords.length)
 				availableShip = ship;
 		if(availableShip == null) {
 			System.out.println("Não há navio disponível com esse tamanho");
@@ -338,12 +337,12 @@ public class UserController {
 		return true;
 	}
 
-	private void printBattleMap(BattleMap battleMap) {
+	public void printBattleMap(BattleMap battleMap) {
 
 		for (int i = -1; i < battleMap.size; i++) {
 			System.out.print(i==-1 ? "   " : i<9 ? " "+(i+1)+" " : (i+1)+" ");
 			for (int j = 0; j < battleMap.size; j++) 
-				System.out.print(i == -1 ? ('A' + j) : battleMap.getStatusAtPoint(j, i).letter);
+				System.out.print((i == -1 ? (char)('A' + j) : battleMap.getStatusAtPoint(i,j).letter)+" ");
 			System.out.println();
 		}
 		
@@ -352,7 +351,7 @@ public class UserController {
 	public Shot shoot(BattleMap battleMap) {
 
 		while(true) {
-			System.out.print("Escolha uma coordenada no mapa para disparar");
+			System.out.println("Escolha uma coordenada no mapa para disparar");
 			
 			System.out.println("U = Vazio, M = Erro, H = Acerto, S = Navio Afundado\n");
 			printBattleMap(battleMap);
@@ -364,7 +363,7 @@ public class UserController {
 			boolean valid = false;
 			try {
 				int y = input.charAt(0) - 'A';
-				int x = Integer.parseInt(input.substring(1));
+				int x = Integer.parseInt(input.substring(1)) - 1;
 				target = new Vector2D(x, y);					
 				
 				valid = isShotValid(target, battleMap);

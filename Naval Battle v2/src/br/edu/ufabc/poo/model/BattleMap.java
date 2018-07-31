@@ -42,7 +42,7 @@ public class BattleMap {
 			newX = direction==0 ? x+i : direction==2 ? x-i : x;
 			newY = direction==1 ? y+i : direction==3 ? y-i : y;
 			
-			if( ! (new Vector2D(newX,newY)).isInBounds(0, 0, size, size) )
+			if( ! (new Vector2D(newX,newY)).isInBounds(0, 0, this.size, this.size) )
 				return false;
 			
 			if(getStatusAtPoint(newX, newY).equalsAny(Status.MISS, Status.SUNK))

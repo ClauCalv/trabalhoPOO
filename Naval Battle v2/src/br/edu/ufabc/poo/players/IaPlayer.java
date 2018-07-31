@@ -38,10 +38,12 @@ public class IaPlayer extends Player {
 		 * ocupados por navios não ultrapasse metade dos pontos do mapa, senão posicionar navios
 		 * será impossível. Daí um bom motivo pra validadar a entrada do número e tipo de navios */
 		boolean valid = false;
-		while(!valid) 
+		while(!valid) {
 			valid = placeShipsAtRandom();
+			battleMap.clearMap();
+			System.out.println("Try");
+		}
 		
-		battleMap.clearMap();
 	}
 	
 	/* Para cada navio, sorteia um ponto no mapa e tenta encaixá-lo. Senão, desiste. */
@@ -59,26 +61,27 @@ public class IaPlayer extends Player {
 			
 			boolean valid = false;
 			
-			for(int i = 0; i < 8; i++) {
+			for(int i = 0; i < 4*battleMap.size; i++) {
 				
 				direction = (direction + 1) % 4;
 				
-				if(i == 4) {
-					int aux = yR;
-					yR = xR;
-					xR = aux;
+				if(i % 4 == 0) {
+					xR = random.nextInt(battleMap.size);
+					yR = random.nextInt(battleMap.size);
+					direction = random.nextInt(4);
+					System.out.println("mudou");
 				}
 				
 				valid = battleMap.isValidShipPosition(ship.size, xR, yR, direction);
+				System.out.println(valid+", x = "+xR+", y = "+yR+", dir = "+direction);
 				if(valid) {
 					putShipOnGrid(ship, xR, yR, direction);
 					break;
 				}
 			}
-			
+			GameController.getInstance().user.printBattleMap(battleMap);
 			if(!valid) 
 				return false;
-			
 		}
 		
 		return true;

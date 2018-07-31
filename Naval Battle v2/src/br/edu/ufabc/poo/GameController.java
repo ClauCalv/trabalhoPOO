@@ -14,10 +14,9 @@ public final class GameController {
 	private int mapSize;
 	private int[] shipSizes;
 	
-	public final UserController user;
+	public UserController user;
 
 	private GameController() {
-		user = new UserController();
 	}
 	
 	public static GameController getInstance() {
@@ -37,7 +36,8 @@ public final class GameController {
 	}
 
 	public void start() {
-		
+
+		user = new UserController();
 		isMultiplayer = user.askMultiplayer();
 		
 		mapSize = user.askMapSize();

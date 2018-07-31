@@ -41,13 +41,14 @@ public class Ship {
 	/** Um navio só é afundado se todas as suas coordenadas já foram afundadas */
 	public boolean isSunk() {
 		
-		if(!isSunk) {	
-			isSunk = true;
+		if(positions!=null)
+			if(!isSunk) {	
+				isSunk = true;
 			
-			for (Vector2D pos : positions)
-				if(!pos.isHit()) 
-					isSunk = false;
-		}
+				for (Vector2D pos : positions)
+					if(!pos.isHit()) 
+						isSunk = false;
+			}
 		
 		return isSunk;
 	}

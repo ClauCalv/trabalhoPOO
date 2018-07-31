@@ -20,7 +20,7 @@ public class Vector2D {
 	}	
 	
 	/* Verifica se a coordenada está no retângulo de jogo. MIN incluso, MAX excluso */
-	public boolean isInBounds(int minX, int maxX, int minY, int maxY) {
+	public boolean isInBounds(int minX, int minY, int maxX, int maxY) {
 		
 		return x >= minX && x < maxX && y >= minY && y < maxY;	
 	}
