@@ -41,7 +41,6 @@ public class IaPlayer extends Player {
 		while(!valid) {
 			valid = placeShipsAtRandom();
 			battleMap.clearMap();
-			System.out.println("Try");
 		}
 		
 	}
@@ -69,17 +68,14 @@ public class IaPlayer extends Player {
 					xR = random.nextInt(battleMap.size);
 					yR = random.nextInt(battleMap.size);
 					direction = random.nextInt(4);
-					System.out.println("mudou");
 				}
 				
 				valid = battleMap.isValidShipPosition(ship.size, xR, yR, direction);
-				System.out.println(valid+", x = "+xR+", y = "+yR+", dir = "+direction);
 				if(valid) {
 					putShipOnGrid(ship, xR, yR, direction);
 					break;
 				}
 			}
-			GameController.getInstance().user.printBattleMap(battleMap);
 			if(!valid) 
 				return false;
 		}
