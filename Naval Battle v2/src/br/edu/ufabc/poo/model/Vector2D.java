@@ -3,7 +3,6 @@ package br.edu.ufabc.poo.model;
 public class Vector2D {
 
 	public final int x, y;
-	/*** Adicionei um status de afundado aqui para eliminar o HashMap dos navios*/
 	private boolean isHit = false;
 	
 	/* Simples encapsulador para uma coordenada */
@@ -13,7 +12,7 @@ public class Vector2D {
 		this.y=y;
 	}
 	
-	/* Compara duas coordenadas (curiosidade: equals sobrescreve de Object) */
+	/* Compara duas coordenadas (sobrescreve Object)*/
 	public boolean equals(Vector2D v) {
 		
 		return x == v.x && y == v.y;
@@ -33,6 +32,7 @@ public class Vector2D {
 		this.isHit = isHit;
 	}
 	
+	//Cria uma nova coordenada, desvinculada da anterior
 	public Vector2D clone() {
 		return new Vector2D(x, y);
 	}

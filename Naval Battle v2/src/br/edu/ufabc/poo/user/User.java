@@ -26,6 +26,7 @@ public class User {
 		this.password = password;
 	}
 	
+	//Confere a senha fornecida
 	public boolean isPasswordCorrect(String password) {
 		return this.password.equals(password);
 	}

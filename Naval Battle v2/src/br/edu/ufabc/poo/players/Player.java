@@ -4,20 +4,9 @@ import br.edu.ufabc.poo.model.*;
 
 public abstract class Player {
 	
-	/*** Eu fiz as modificações anunciadas no item 3) do comentário da última versão.
-	 * Agora, battleMap não é mais um int[][], mas uma classe, e não temos mais um
-	 * "protected static final int UNKNOWN = 0, MISS = 1, HIT = 2, SUNK = 3", mas em
-	 * vez disso temos um ENUM. Um ENUM é um tipo de classe na qual todas as instâncias
-	 * possíveis já foram criadas e são estáticas, sendo efetivamente uma lista pronta
-	 * de objetos. 
-	 * 
-	 * Reparem na nova sintaxe usada ao mexer nos Status, que são Enums. */
-	
 	protected final Ship[] myShips;
-	/** EDIT: Eu tirei todos os HashMaps do código substituindo por atributos boolean nas classes. */
 	protected final Ship[] enemyShips;
 	
-	/** Eu fiz de battleMap que era um int[][] uma classe separada */
 	protected final BattleMap battleMap;
 	
 	/* Cria para si uma cópia cega dos navios inimigos, para ser rastreada */

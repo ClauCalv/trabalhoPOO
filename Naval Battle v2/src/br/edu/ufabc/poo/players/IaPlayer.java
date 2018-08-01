@@ -10,14 +10,7 @@ import br.edu.ufabc.poo.strategy.*;
 public class IaPlayer extends Player {
 
 	private Random random;
-	
-	/*** Implantei aqui o DesignPattern: Strategy, mas em vez de interface, fiz com classe abstrata
-	 * https://en.wikipedia.org/wiki/Strategy_pattern 
-	 * 
-	 * Movi vários métodos de uma classe pra outra:
-	 * -- IsValidShipPosition foi pra BattleMap
-	 * -- updateProbebilityMap foi pra DefaultProbabilityMapDrawer
-	 * -- updateProbebilityMapOnSnD foi pra SnDProbabilityMapDrawer */
+
 	private ProbabilityMapDrawer probabilityMap;
 	
 	public IaPlayer(Ship[] myShips, Ship[] enemyShips, int mapSize) {
@@ -29,14 +22,6 @@ public class IaPlayer extends Player {
 	/* Para que os navios sejam sempre aleatórios, tenta várias combinações e pega uma válida */
 	public void placeShips() {
 		
-		/** Tá, toda essa sequência de métodos é uma grande gambiarra. Pra não ter que fazer uma
-		 * coleção de matrizes de navios que ela começa jogando (seria uma péssima IA depois de se
-		 * enfrentar algumas vezes), eu gero aleatoriamente uma matriz, e se não é válida, eu
-		 * descarto e tento outra.
-		 * 
-		 * Isso pode demorar, por isso é importante que a soma dos pontos
-		 * ocupados por navios não ultrapasse metade dos pontos do mapa, senão posicionar navios
-		 * será impossível. Daí um bom motivo pra validadar a entrada do número e tipo de navios */
 		boolean valid = false;
 		while(!valid) {
 			valid = placeShipsAtRandom();
@@ -54,6 +39,7 @@ public class IaPlayer extends Player {
 		 * 
 		 * Para evitar de reiniciar muitas vezes, eu peço pra ele conferir no espelho desse ponto,
 		 * o ponto (y,x), antes de anunciar que os navios não encaixam mais */
+		
 		for (Ship ship : myShips) {
 			int xR = random.nextInt(battleMap.size), yR = random.nextInt(battleMap.size);
 			int direction = random.nextInt(4);

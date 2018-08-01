@@ -5,15 +5,11 @@ public class Ship {
 	
 	public final int size, id;
 	
-	/*** Coloquei um status aqui pra tirar o HashMap de Player */
 	private boolean isSunk = false;
-	
-	/** Ver os comentários em Player */
+	/** Escolhi, em vez de armazenar navios no mapa, armazenar as coordenadas diretamente no navio,
+	 * poupando assim o esforço de associar cada coordenada do mapa a um navio*/
 	private Vector2D[] positions;
 	
-	/** Um navio só tem tamanho e identificador. O identificador vai ser usado somente na 
-	 * hora de saber qual dos navios inimigos que eu guardo no HashMap é aquele que foi
-	 * afundado, na classe "Player" */
 	public Ship(int size, int id) {		
 		this.size = size;
 		this.id = id;

@@ -5,13 +5,15 @@ public enum Status {
 	
 	public final char letter;
 	
+	//Cada Status já leva em si a abreviação que levará no mapa impresso ao usuário
 	private Status(char letter) {
 		this.letter = letter;
 	}
 	
-	/*** Essas acima são as únicas quatro instância possíveis de Status, não se pode
-	 * criar novas. Invoca-se elas estaticamente, por "Status.MISS", por exemplo */
+	/*** Uma coordenada pode ter apenas 4 estados: Desconhecido, sem nenhum navio,
+	 *  com navio e atingido, e com navio afundado */
 	
+	//Compara rapidamente se um Status é igual a outros.
 	public boolean equalsAny(Status ... status) {
 		
 		for (Status stat : status)

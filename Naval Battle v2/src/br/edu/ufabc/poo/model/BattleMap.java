@@ -4,7 +4,7 @@ public class BattleMap {
 
 	public final int size;
 	
-	/*** Ele é um mapa de Status, que é um Enum. Repare que Enums ainda são objetos.*/
+	/*** Ele é um mapa de Status, que é um Enum */
 	protected final Status[][] map;
 	
 	public BattleMap(int mapSize) {
@@ -12,7 +12,7 @@ public class BattleMap {
 		map = new Status[mapSize][mapSize];
 	}
 	
-	/*** Este método estava na classe Player, mas veio pra cá. */
+	/*** Limpa o mapa, deixando todas as suas coordenadas desconhecidas*/
 	public void clearMap() {
 				
 		for (int i = 0; i < map.length; i++) {
@@ -53,6 +53,7 @@ public class BattleMap {
 		
 	}
 	
+	//Retorna o Status da coordenada alvo
 	public Status getStatusAtPoint(Vector2D point) {
 		return map[point.x][point.y];
 	}
@@ -61,6 +62,7 @@ public class BattleMap {
 		return map[x][y];
 	}
 	
+	//Define o Status na coordenada alvo
 	public void setStatusAtPoint(Vector2D point, Status status) {
 		map[point.x][point.y] = status;
 	}

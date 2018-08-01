@@ -10,7 +10,6 @@ public class DefaultProbabilityMapDrawer extends ProbabilityMapDrawer {
 		super(battleMap, ships);
 	}
 
-	/*** Este é o antigo método updateProbabilityMap() da classe IAPlayer*/
 	public int[][] update() {
 
 		clearMap();
